@@ -7,7 +7,7 @@ use CodeIgniter\Model;
 class modelInfoData extends Model
 {
     protected $table      = 'info_data';
-    protected $allowedFields = ['id', 'start_time', 'finish_time', 'latitude', 'longitude', 'stat', 'delete_stat'];
+    protected $allowedFields = ['id', 'start_time', 'finish_time', 'latitude', 'longitude', 'radius', 'stat', 'delete_stat'];
     
     public function filterDate()
     {

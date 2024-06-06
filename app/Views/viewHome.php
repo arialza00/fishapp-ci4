@@ -103,7 +103,7 @@
                             <input class="form-control" type="datetime-local" id="startDateMark">
                         </div>
                         <div class="col-xs-6">
-                            <label for="ex2">TANGGAL BERAKHIR</label>
+                            <label for="ex1">TANGGAL BERAKHIR</label>
                             <input class="form-control" type="datetime-local" id="endDateMark">
                         </div>
                     </div>
@@ -128,7 +128,6 @@
                         <select class="form-control" id="statMark">
                             <option value="1">Persebaran Ikan Tinggi</option>
                             <option value="2">Persebaran Ikan Rendah</option>
-                            <option value="3">Gelombang Tinggi</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -339,6 +338,7 @@
                 pickDate = fillZero(moreHourLater.getFullYear(), 4) + "-" + fillZero((parseInt(moreHourLater.getMonth()) + 1).toString(), 2) + "-" + fillZero(moreHourLater.getDate(), 2);
                 var pickTime = fillZero(moreHourLater.getHours(), 2) + ":" + fillZero(moreHourLater.getMinutes(), 2);
                 document.getElementById("endDateMark").value = pickDate + " " + pickTime;
+                document.getElementById("radiusMark").value = defaultMarkRadius;
                 $('#ModalMark').modal('show');
             } else {
                 markerOnMouseDown = false;
@@ -346,8 +346,8 @@
         });
 
         function prepareTimelapse() {
-            var startDateTimeTL = new Date(document.getElementById("startDate").value + " " + document.getElementById("startTime").value);
-            var endDateTimeTL = new Date(document.getElementById("endDate").value + " " + document.getElementById("endTime").value);
+            var startDateTimeTL = new Date(document.getElementById("startDate").value);
+            var endDateTimeTL = new Date(document.getElementById("endDate").value);
             startDateTimeInt = startDateTimeTL.getTime();
             endDateTimeInt = endDateTimeTL.getTime();
             currentDateTimeInt = startDateTimeInt;
@@ -376,9 +376,9 @@
                                 var endDate = new Date(data.finish_time);
                                 var startDate = new Date(data.start_time);
                                 var nowDate = new Date();
-                                let textEndDate = endDate.toString();
-                                let textStartDate = startDate.toString();
-                                let textNowDate = nowDate.toString();
+                                let textEndDate = endDate.toISOString().slice(0, 19).replace('T', ' ');
+                                let textStartDate = startDate.toISOString().slice(0, 19).replace('T', ' ');
+                                let textNowDate = nowDate.toISOString().slice(0, 19).replace('T', ' ');
                                 if (data.stat === "1") {
                                     customIcon = locationBlueIcon;
                                     text = "Pesebaran Ikan Tinggi";
@@ -462,27 +462,29 @@
             var radius = document.getElementById("radiusMark").value;
             var stat = document.getElementById("statMark").value;
 
-            var startObject = Date.parse("startDate");
-            var startTimestamp = startObject;
-            var endObject = Date.parse("endDate");
-            var endTimestamp = endObject;
-            var now = Date.parse();
-            var nowTimeStamp = now(getTime());
+            var startObject = new Date(startDate);
+            var startTimestamp = startObject.getTime() / 1000;
+            var endObject = new Date(endDate);
+            var endTimestamp = endObject.getTime() / 1000;
+            var now = new Date();
+            var nowTimeStamp = now.getTime() / 1000;
+            var startTime = startObject.toISOString().slice(0, 19).replace('T', ' ');
+            var endTime = endObject.toISOString().slice(0, 19).replace('T', ' ');
 
-            if (endObject < startObject || endObject < nowTimeStamp) {
+            if (endTimestamp < startTimestamp + 60 || endTimestamp < nowTimeStamp + 60) {
                 const errorMessage = document.querySelector('.error-message');
                 errorMessage.textContent = 'kesalahan dalam input tanggal dan waktu, silahkan coba lagi.';
                 return;
             }
-
             $.ajax({
                 url: "InfoData/infoDataSave",
                 type: "POST",
                 data: {
-                    startDate: startTimestamp,
-                    endDate: endTimestamp,
+                    startDate: startTime,
+                    endDate: endTime,
                     latitude: latitude,
                     longitude: longitude,
+                    radius: radius,
                     stat: stat,
                     method: "add"
                 },
