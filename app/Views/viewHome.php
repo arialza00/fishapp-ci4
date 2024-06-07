@@ -8,7 +8,7 @@
 
     <style>
         #map {
-            height: 95vh;
+            height: 100vh;
             width: 100vw;
         }
 
@@ -63,6 +63,43 @@
             box-shadow: none !important;
             border: none !important;
         }
+
+        /*Legend specific*/
+        .legend {
+            padding: 6px 8px;
+            font: 14px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255, 255, 255, 0.8);
+            /*box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);*/
+            /*border-radius: 5px;*/
+            line-height: 24px;
+            color: #555;
+        }
+
+        .legend h4 {
+            text-align: center;
+            font-size: 16px;
+            margin: 2px 12px 8px;
+            color: #777;
+        }
+
+        .legend span {
+            position: relative;
+            bottom: 3px;
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin: 0 8px 0 0;
+            opacity: 0.7;
+        }
+
+        .legend i.icon {
+            background-size: 18px;
+            background-color: rgba(255, 255, 255, 1);
+        }
     </style>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -82,7 +119,7 @@
     <div class="custom1" id="viewLiveTimelapse"></div>
     <div class="custom3"><button type="button" class="btn btn-xs btn-warning" onClick="changeMarkStat()" id="viewMarkingStat"></button></div>
     <div><button class="custom2" type="button" onClick="playPauseTimelapse()" id="timeLapseClock"></button></div>
-    <div class="custom" style="top:10px;"><button type="button" onClick="showMenu()" class="btn btn-primary btn-xs btn-width-fixed">fishAPP</button></div>
+    <!-- <div class="custom" style="top:10px;"><button type="button" onClick="showMenu()" class="btn btn-primary btn-xs btn-width-fixed">fishAPP</button></div> -->
     <div class="custom" style="top:40px;"><button type="button" id="buttonMAP" style="visibility:hidden;" class="btn btn-primary btn-xs active btn-width-fixed">MAP</button></div>
     <div class="custom" style="top:65px;"><button type="button" id="buttonData" style="visibility:hidden;" onclick="window.location.href='/Gateway';" class="btn btn-primary btn-xs btn-width-fixed">DATA</button></div>
     <div class="custom" style="top:95px;"><button type="button" id="buttonTimelapse" onClick="timeLapse()" style="visibility:hidden;" class="btn btn-primary btn-xs btn-width-fixed" data-toggle="modal" data-target="#Modal">TIMELAPSE</button></div>
@@ -224,6 +261,7 @@
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
@@ -234,17 +272,6 @@
             document.getElementById("viewMarkingStat").innerHTML = "DISABLE ADD MARK INFO";
 
             var layerGrupArray = [];
-            <?php foreach ($dataGateway as $dataGateway) : ?>
-                <?php if ($dataGateway['delete_stat'] == 0) : ?>
-                    var marker<?= $dataGateway['id']; ?> = new L.marker([<?= $dataGateway['latitude']; ?>, <?= $dataGateway['longitude']; ?>], {
-                        icon: towerIcon,
-                    });
-                    marker<?= $dataGateway['id']; ?>.bindPopup("<p style='font-size:10px;'><?= $dataGateway['gateway_name']; ?></p><button type='button' onClick='zoomTo(<?= $dataGateway['latitude']; ?>, <?= $dataGateway['longitude']; ?>, 12)' class='btn btn-primary btn-xs btn-width-fixed'>zoom to</button>", {
-                        closeButton: false
-                    });
-                    layerGrup.addLayer(marker<?= $dataGateway['id']; ?>);
-                <?php endif; ?>
-            <?php endforeach; ?>
 
             <?php foreach ($dataFisherman as $dataFisherman) : ?>
                 <?php if ($dataFisherman['delete_stat'] == 0) : ?>
@@ -304,6 +331,20 @@
             };
 
         });
+
+        var legend = L.control({
+            position: 'bottomright'
+        });
+
+        legend.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML += "<h4>Legend</h4>";
+            div.innerHTML += '<i><img src="fish.png" alt="Icon" width="16" height="16"></i><span>Potensial</span><br>';
+            div.innerHTML += '<i><img src="fish_grey.png" alt="Icon" width="16" height="16"></i><span>Potensial Sedang</span><br>';
+            return div;
+        };
+
+        legend.addTo(map);
 
         map.on('zoomstart', function(e) {
             map.removeLayer(timeLapseLayerGrup);
